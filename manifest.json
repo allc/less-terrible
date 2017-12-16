@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+
+  "name": "Less terrible for Rayna's page",
+  "description": "This extension makes Rayna's page less terrible",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ]
+}
