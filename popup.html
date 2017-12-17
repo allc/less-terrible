@@ -18,10 +18,18 @@
       font-size: 15px;
     }
 
-    #container {
+    #container>div {
       align-items: center;
       display: flex;
       justify-content: space-between;
+    }
+
+    a {
+      color: gray;
+    }
+
+    a:visited {
+      color: gray;
     }
   </style>
 
@@ -39,12 +47,13 @@
     <h1>Less terrible for Rayna's page</h1>
   </header>
   <div id="container">
-    <span>Less terrible</span>
-    <input id="less-terr" type="checkbox">
+    <div><label>Feels good!</label><input type="radio" name="status"></div>
+    <div><label>Less terrible!</label><input type="radio" name="status"></div>
+    <div><input placeholder="background image url"><button>use this</button></div>
   </div>
   <footer>
     <p>
-      <a href="http://students.ecs.soton.ac.uk/rb1g16/links/" target="_blank">Rayna's page</a>
+      <a href="http://students.ecs.soton.ac.uk/rb1g16/links/" target="_blank">go to Rayna's page</a>
     </p>
   </footer>
 </body>
