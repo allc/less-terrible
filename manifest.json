@@ -4,13 +4,18 @@
   "name": "Less terrible for Rayna's page",
   "description": "This extension makes Rayna's page less terrible",
   "version": "1.0",
-
   "browser_action": {
     "default_icon": "icon.png",
     "default_popup": "popup.html"
   },
+  "content_scripts": [
+    {
+      "matches": ["http://students.ecs.soton.ac.uk/rb1g16/*"],
+      "js": ["content.js"]
+    }
+  ],
   "permissions": [
-    "activeTab",
+    "http://students.ecs.soton.ac.uk/rb1g16/*",
     "storage"
   ]
 }

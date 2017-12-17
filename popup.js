@@ -48,34 +48,39 @@ function getCurrentTabUrl(callback) {
 }
 
 /**
- * Gets the saved background color for url.
+ * Gets the saved status for url.
  *
- * @param {string} url URL whose background color is to be retrieved.
- * @param {function(string)} callback called with the saved background color for
- *     the given url on success, or a falsy value if no color is retrieved.
+ * @param {string} url URL whose info is to be retrieved.
+ * @param {function(string)} callback called with the saved info for
+ *     the given url on success, or a falsy value if no saved info is retrieved.
  */
-function getSavedTimelineStatus(url, callback) {
+function getSavedInfo(url, callback) {
   // See https://developer.chrome.com/apps/storage#type-StorageArea. We check
   // for chrome.runtime.lastError to ensure correctness even when the API call
   // fails.
-  chrome.storage.sync.get(url, (items) => {
-    callback(chrome.runtime.lastError ? null : items[url]);
+  chrome.storage.local.get(url, (info) => {
+    callback(chrome.runtime.lastError ? null : info[url]);
   });
 }
 
 /**
- * Sets the given background color for url.
+ * Sets the status for url.
  *
- * @param {string} url URL for which background color is to be saved.
- * @param {string} stat The visibility status of timeline.
+ * @param {string} url URL for which status is to be saved.
+ * @param {string} stat The status.
  */
-function saveTimelineStatus(url, stat) {
-  var items = {};
-  items[url] = stat;
-  // See https://developer.chrome.com/apps/storage#type-StorageArea. We omit the
-  // optional callback since we don't need to perform any action once the
-  // background color is saved.
-  chrome.storage.sync.set(items);
+function saveStatus(url, stat) {
+  getSavedInfo(url, (info) => {
+    var items = {};
+    if (info) {
+      info['stat'] = stat;
+      items[url] = info;
+    } else {
+      var item = { 'stat': background };
+      items[url] = item
+    }
+    chrome.storage.local.set(items);
+  });
 }
 
 /**
@@ -83,44 +88,33 @@ function saveTimelineStatus(url, stat) {
  *
  * @param {boolean} hide Make the timeline hidden or not
  */
-function toggleLessTerrible(t) {
-  var url = "https://media.giphy.com/media/12KCil0lp9BAoo/200.gif";
+function toggleLessTerrible(t, origionalBackground) {
+  var background = origionalBackground;
+  background = background.replace(/"/g, '\'');  
+  console.log(background);
   if (t) {
-    url = "http://i1.kym-cdn.com/photos/images/newsfeed/001/091/264/665.jpg";
+    background = "url('http://i1.kym-cdn.com/photos/images/newsfeed/001/091/264/665.jpg')";
   }
-  var script = "document.body.style.backgroundImage = \"url('" + url + "')\"";
-  
+  var script = "document.body.style.backgroundImage = \"" + background + "\"";
+
   chrome.tabs.executeScript({
     code: script
   });
 }
 
-// This extension loads the saved background color for the current tab if one
-// exists. The user can select a new background color from the dropdown for the
-// current page, and it will be saved as part of the extension's isolated
-// storage. The chrome.storage API is used for this purpose. This is different
-// from the window.localStorage API, which is synchronous and stores data bound
-// to a document's origin. Also, using chrome.storage.sync instead of
-// chrome.storage.local allows the extension data to be synced across multiple
-// user devices.
 document.addEventListener('DOMContentLoaded', () => {
   getCurrentTabUrl((url) => {
     var checkbox = document.getElementById('less-terr');
-    // Load the saved background color for this page and modify the dropdown
-    // value, if needed.
-    // getSavedBackgroundColor(url, (savedColor) => {
-//       if (savedColor) {
-//         changeBackgroundColor(savedColor);
-//         dropdown.value = savedColor;
-//       }
-//     });
-
-    // Ensure the background color is changed and saved when the dropdown
-    // selection changes.
+    getSavedInfo(url, (info) => {
+      if (info && info['stat'] && info['oldBackground'] && info['background'] === info['oldBackground']) {
+        checkbox.checked = true;
+      }
+      checkbox.addEventListener('change', () => {
+        toggleLessTerrible(checkbox.checked, info['background']);
+      });
+    });
     checkbox.addEventListener('change', () => {
-      toggleLessTerrible(checkbox.checked);
-      //changeBackgroundColor(dropdown.value);
-      //saveBackgroundColor(url, dropdown.value);
+      saveStatus(url, checkbox.checked);
     });
   });
 });
