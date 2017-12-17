@@ -69,14 +69,28 @@ function getSavedInfo(url, callback) {
  * @param {string} url URL for which status is to be saved.
  * @param {string} stat The status.
  */
-function saveStatus(url, stat) {
+function saveStatus(url, stat, callback) {
   getSavedInfo(url, (info) => {
     var items = {};
     if (info) {
       info['stat'] = stat;
       items[url] = info;
     } else {
-      var item = { 'stat': background };
+      var item = { 'stat': stat };
+      items[url] = item
+    }
+    chrome.storage.local.set(items, callback);
+  });
+}
+
+function saveCustomUrl(url, customUrl) {
+  getSavedInfo(url, (info) => {
+    var items = {};
+    if (info) {
+      info['customUrl'] = customUrl;
+      items[url] = info;
+    } else {
+      var item = { 'customUrl': customUrl };
       items[url] = item
     }
     chrome.storage.local.set(items);
@@ -88,12 +102,12 @@ function saveStatus(url, stat) {
  *
  * @param {boolean} hide Make the timeline hidden or not
  */
-function toggleLessTerrible(t, origionalBackground) {
-  var background = origionalBackground;
+function changeBackground(background) {
+  // var background = origionalBackground;
   background = background.replace(/"/g, '\'');  
-  if (t) {
-    background = "url('http://i1.kym-cdn.com/photos/images/newsfeed/001/091/264/665.jpg')";
-  }
+  // if (t) {
+  //   background = "url('http://i1.kym-cdn.com/photos/images/newsfeed/001/091/264/665.jpg')";
+  // }
   var script = "document.body.style.backgroundImage = \"" + background + "\"";
 
   chrome.tabs.executeScript({
@@ -102,18 +116,46 @@ function toggleLessTerrible(t, origionalBackground) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  var origionalButton = document.getElementById('origional-button');
+  var ltButton = document.getElementById('lt-button');
+  var urlButton = document.getElementById('url-button');
+  var urlInput = document.getElementById('url-input');
   getCurrentTabUrl((url) => {
-    var checkbox = document.getElementById('less-terr');
     getSavedInfo(url, (info) => {
-      if (info && info['stat'] && info['oldBackground'] && info['background'] === info['oldBackground']) {
-        checkbox.checked = true;
+      if (info['background'] === info['oldBackground']) {
+        switch (info['stat']) {
+          case 'origional':
+            origionalButton.checked = true;
+            break;
+          case 'lt':
+            ltButton.checked = true;
+            break;
+          case 'url':
+            urlButton.focus();
+            break;
+          default:
+            break;
+        }
+      } else {
+        origionalButton.checked = true;
       }
-      checkbox.addEventListener('change', () => {
-        toggleLessTerrible(checkbox.checked, info['background']);
-      });
-    });
-    checkbox.addEventListener('change', () => {
-      saveStatus(url, checkbox.checked);
+      origionalButton.addEventListener('click', function () {
+        saveStatus(url, 'origional');
+        changeBackground(info['background']);
+      })
+      ltButton.addEventListener('click', function() {
+        saveStatus(url, 'lt');
+        changeBackground("url('http://i1.kym-cdn.com/photos/images/newsfeed/001/091/264/665.jpg')");
+      })
+      urlButton.addEventListener('click', function() {
+        saveStatus(url, 'url', () => saveCustomUrl(url, urlInput.value));
+        origionalButton.checked = false;
+        ltButton.checked = false;
+        changeBackground("url('" + urlInput.value + "')");
+      })
+      if (info['customUrl']) {
+        urlInput.value = info['customUrl'];
+      }
     });
   });
 });

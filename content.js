@@ -54,9 +54,20 @@ var ltOriginalBackground = window.getComputedStyle(document.body).backgroundImag
 ltGetSavedInfo(ltUrl, (info) => {
     if (info) {
         ltSaveOldBackground(ltUrl, info['background']);
-    }
-    if (info && info['stat'] && info['background'] === ltOriginalBackground) {
-        document.body.style.backgroundImage = "url('http://i1.kym-cdn.com/photos/images/newsfeed/001/091/264/665.jpg')"
+        if (info['background'] === ltOriginalBackground) {
+            switch (info['stat']) {
+                case 'origional':
+                  break;
+                case 'lt':
+                  document.body.style.backgroundImage = "url('http://i1.kym-cdn.com/photos/images/newsfeed/001/091/264/665.jpg')"
+                  break;
+                case 'url':
+                  document.body.style.backgroundImage = "url('" + info['customUrl'] + "')";
+                  break;
+                default:
+                  break;
+            }
+        }
     }
 });
 ltSaveBackground(ltUrl, ltOriginalBackground);
