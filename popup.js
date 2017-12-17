@@ -91,7 +91,6 @@ function saveStatus(url, stat) {
 function toggleLessTerrible(t, origionalBackground) {
   var background = origionalBackground;
   background = background.replace(/"/g, '\'');  
-  console.log(background);
   if (t) {
     background = "url('http://i1.kym-cdn.com/photos/images/newsfeed/001/091/264/665.jpg')";
   }

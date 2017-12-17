@@ -34,7 +34,7 @@ function ltSaveBackground(url, background) {
     });
 }
 
-function lsSaveOldBackground(url, oldBackground) {
+function ltSaveOldBackground(url, oldBackground) {
     ltGetSavedInfo(url, (info) => {
         var items = {};
         if (info) {
@@ -52,7 +52,9 @@ let ltUrl = window.location.protocol + "//" + window.location.host + window.loca
 var ltOriginalBackground = window.getComputedStyle(document.body).backgroundImage;
 
 ltGetSavedInfo(ltUrl, (info) => {
-    lsSaveOldBackground(ltUrl, info['background']);
+    if (info) {
+        ltSaveOldBackground(ltUrl, info['background']);
+    }
     if (info && info['stat'] && info['background'] === ltOriginalBackground) {
         document.body.style.backgroundImage = "url('http://i1.kym-cdn.com/photos/images/newsfeed/001/091/264/665.jpg')"
     }
